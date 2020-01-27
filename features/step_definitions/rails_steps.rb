@@ -1,4 +1,3 @@
-require 'pry'
 Given /^I generate a new rails application$/ do
   steps %{
     When I successfully run `rails new #{APP_NAME} --skip-bundle`
@@ -25,7 +24,7 @@ Given /^I generate a new rails application$/ do
     And I remove turbolinks
     And I comment out lines that contain "action_mailer" in "config/environments/*.rb"
     And I empty the application.js file
-    And I configure the application to use paperclip from this project
+    And I configure the application to use "paperclip" from this project
   }
 
   FileUtils.chdir("../../..")
@@ -199,8 +198,8 @@ Then /^the file at "([^"]*)" should be the same as "([^"]*)"$/ do |web_file, pat
   expect(actual).to eq(expected)
 end
 
-When /^I configure the application to use paperclip from this project$/ do
-  append_to_gemfile "gem 'kt-paperclip', path: '#{PROJECT_ROOT}', require: 'paperclip'"
+When /^I configure the application to use "([^\"]+)" from this project$/ do |name|
+  append_to_gemfile "gem '#{name}', :path => '#{PROJECT_ROOT}'"
   steps %{And I successfully run `bundle install --local`}
 end
 
