@@ -1439,6 +1439,32 @@ describe Paperclip::Storage::S3 do
     end
   end
 
+  context "with S3 credentials supplied as Pathname and aliases being set" do
+    before do
+      ENV["S3_KEY"]    = "pathname_key"
+      ENV["S3_BUCKET"] = "pathname_bucket"
+      ENV["S3_SECRET"] = "pathname_secret"
+
+      rails_env("test") do
+        rebuild_model aws2_add_region.merge storage: :s3,
+                                            s3_credentials: Pathname.new(fixture_file("aws_s3.yml"))
+
+        Dummy.delete_all
+        @dummy = Dummy.new
+      end
+    end
+
+    it "parses the credentials" do
+      assert_equal "pathname_bucket", @dummy.avatar.bucket_name
+
+      assert_equal "pathname_key",
+                   @dummy.avatar.s3_bucket.client.config.access_key_id
+
+      assert_equal "pathname_secret",
+                   @dummy.avatar.s3_bucket.client.config.secret_access_key
+    end
+  end
+
   context "with S3 credentials in a YAML file" do
     before do
       ENV["S3_KEY"]    = "env_key"
@@ -1448,6 +1474,33 @@ describe Paperclip::Storage::S3 do
       rails_env("test") do
         rebuild_model aws2_add_region.merge storage: :s3,
                                             s3_credentials: File.new(fixture_file("s3.yml"))
+
+        Dummy.delete_all
+
+        @dummy = Dummy.new
+      end
+    end
+
+    it "runs the file through ERB" do
+      assert_equal "env_bucket", @dummy.avatar.bucket_name
+
+      assert_equal "env_key",
+                   @dummy.avatar.s3_bucket.client.config.access_key_id
+
+      assert_equal "env_secret",
+                   @dummy.avatar.s3_bucket.client.config.secret_access_key
+    end
+  end
+
+  context "with S3 credentials in a YAML file and aliases being set" do
+    before do
+      ENV["S3_KEY"]    = "env_key"
+      ENV["S3_BUCKET"] = "env_bucket"
+      ENV["S3_SECRET"] = "env_secret"
+
+      rails_env("test") do
+        rebuild_model aws2_add_region.merge storage: :s3,
+                                            s3_credentials: File.new(fixture_file("aws_s3.yml"))
 
         Dummy.delete_all
 
