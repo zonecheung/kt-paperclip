@@ -1,3 +1,5 @@
+require 'addressable/uri'
+
 module Paperclip
   class HttpUrlProxyAdapter < UriAdapter
     def self.register
@@ -9,8 +11,8 @@ module Paperclip
     REGEXP = /\Ahttps?:\/\//.freeze
 
     def initialize(target, options = {})
-      escaped = CGI.escape(target)
-      super(URI(target == CGI.unescape(target) ? escaped : target), options)
+      escaped = Addressable::URI.encode(target)
+      super(URI(target == Addressable::URI.decode(target) ? escaped : target), options)
     end
   end
 end
